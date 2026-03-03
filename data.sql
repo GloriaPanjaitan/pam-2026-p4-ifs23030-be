@@ -8,3 +8,13 @@ CREATE TABLE IF NOT EXISTS plants (
     created_at TIMESTAMP NOT NULL,
     updated_at TIMESTAMP NOT NULL
 );
+CREATE TABLE IF NOT EXISTS swords (
+                                      id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    nama VARCHAR(100) NOT NULL,
+    path_gambar VARCHAR(255) NOT NULL,
+    sejarah TEXT NOT NULL,
+    kelebihan TEXT NOT NULL,
+    fakta_unik TEXT NOT NULL,
+    created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
+    );

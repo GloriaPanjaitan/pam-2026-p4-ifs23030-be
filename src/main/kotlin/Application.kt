@@ -12,9 +12,10 @@ import org.delcom.helpers.configureDatabases
 import org.koin.ktor.plugin.Koin
 
 fun main(args: Array<String>) {
+    // Perbaikan: Tambahkan ignoreIfMissing agar tidak error saat deploy
     val dotenv = dotenv {
         directory = "."
-        ignoreIfMissing = false
+        ignoreIfMissing = true
     }
 
     dotenv.entries().forEach {
@@ -25,9 +26,9 @@ fun main(args: Array<String>) {
 }
 
 fun Application.module() {
-
     install(CORS) {
         anyHost()
+        allowHeader(io.ktor.http.HttpHeaders.ContentType)
     }
 
     install(ContentNegotiation) {
