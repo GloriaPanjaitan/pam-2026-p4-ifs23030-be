@@ -12,14 +12,15 @@ import org.delcom.helpers.configureDatabases
 import org.koin.ktor.plugin.Koin
 
 fun main(args: Array<String>) {
-    // Perbaikan: Tambahkan ignoreIfMissing agar tidak error saat deploy
     val dotenv = dotenv {
-        directory = "."
+        directory = "." // Pastikan file .env ada di folder root project
         ignoreIfMissing = true
     }
 
+    // Memasukkan variabel ke System Property agar bisa dibaca oleh YAML
     dotenv.entries().forEach {
         System.setProperty(it.key, it.value)
+        println("Loaded Env: ${it.key}") // Untuk debug, bisa dihapus nanti
     }
 
     EngineMain.main(args)
@@ -29,6 +30,9 @@ fun Application.module() {
     install(CORS) {
         anyHost()
         allowHeader(io.ktor.http.HttpHeaders.ContentType)
+        allowMethod(io.ktor.http.HttpMethod.Options)
+        allowMethod(io.ktor.http.HttpMethod.Put)
+        allowMethod(io.ktor.http.HttpMethod.Delete)
     }
 
     install(ContentNegotiation) {
