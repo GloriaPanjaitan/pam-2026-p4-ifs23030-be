@@ -9,20 +9,19 @@ import org.delcom.data.AppException
 import org.delcom.data.ErrorResponse
 import org.delcom.helpers.parseMessageToMap
 import org.delcom.services.PlantService
-import org.delcom.services.SwordService // Import Service milikmu
+import org.delcom.services.SwordService
 import org.delcom.services.ProfileService
 import org.koin.ktor.ext.inject
 
 fun Application.configureRouting() {
     val plantService: PlantService by inject()
-    val swordService: SwordService by inject() // Inject Service milikmu melalui Koin
+    val swordService: SwordService by inject()
     val profileService: ProfileService by inject()
 
     install(StatusPages) {
         // Tangkap AppException (Validasi gagal, dsb)
         exception<AppException> { call, cause ->
             val dataMap: Map<String, List<String>> = parseMessageToMap(cause.message)
-
             call.respond(
                 status = HttpStatusCode.fromValue(cause.code),
                 message = ErrorResponse(
@@ -36,7 +35,7 @@ fun Application.configureRouting() {
         // Tangkap semua Throwable lainnya (Error server 500)
         exception<Throwable> { call, cause ->
             call.respond(
-                status = HttpStatusCode.fromValue(500),
+                status = HttpStatusCode.InternalServerError,
                 message = ErrorResponse(
                     status = "error",
                     message = cause.message ?: "Unknown error",
@@ -47,35 +46,38 @@ fun Application.configureRouting() {
     }
 
     routing {
+        // Halaman depan (Root)
         get("/") {
             call.respondText("API telah berjalan. Dibuat oleh Gloria Panjaitan.")
         }
 
-        // --- Route Plants (Milik Dosen) ---
-        route("/plants") {
-            get { plantService.getAllPlants(call) }
-            post { plantService.createPlant(call) }
-            get("/{id}") { plantService.getPlantById(call) }
-            put("/{id}") { plantService.updatePlant(call) }
-            delete("/{id}") { plantService.deletePlant(call) }
-            get("/{id}/image") { plantService.getPlantImage(call) }
-        }
+        // --- SEMUA API DIBUNGKUS DALAM /api AGAR TIDAK 404 ---
+        route("/api") {
 
-        // --- Route Swords (Milik Kamu) ---
-        route("/swords") {
-            get { swordService.getAllSwords(call) }
-            post { swordService.createSword(call) }
-            get("/{id}") { swordService.getSwordById(call) }
-            // Jika nanti ingin tambah fitur update:
-            // put("/{id}") { swordService.updateSword(call) }
-            delete("/{id}") { swordService.deleteSword(call) }
-            get("/{id}/image") { swordService.getSwordImage(call) }
-        }
+            // 1. Route Plants
+            route("/plants") {
+                get { plantService.getAllPlants(call) }
+                post { plantService.createPlant(call) }
+                get("/{id}") { plantService.getPlantById(call) }
+                put("/{id}") { plantService.updatePlant(call) }
+                delete("/{id}") { plantService.deletePlant(call) }
+                get("/{id}/image") { plantService.getPlantImage(call) }
+            }
 
-        // Route Profile
-        route("/profile"){
-            get { profileService.getProfile(call) }
-            get("/photo") { profileService.getProfilePhoto(call) }
+            // 2. Route Swords (Milik Gloria)
+            route("/swords") {
+                get { swordService.getAllSwords(call) }
+                post { swordService.createSword(call) }
+                get("/{id}") { swordService.getSwordById(call) }
+                delete("/{id}") { swordService.deleteSword(call) }
+                get("/{id}/image") { swordService.getSwordImage(call) }
+            }
+
+            // 3. Route Profile
+            route("/profile") {
+                get { profileService.getProfile(call) }
+                get("/photo") { profileService.getProfilePhoto(call) }
+            }
         }
     }
 }
